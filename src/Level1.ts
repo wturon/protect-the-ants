@@ -24,6 +24,13 @@ class Level1 extends Phaser.Scene {
       fontSize: "24px",
       color: "#000",
     });
+
+    // Add small text under the score
+    this.add.text(16, 50, "Click anywhere to guide the ants!", {
+      fontSize: "16px",
+      color: "#000",
+    });
+
     this.ants = this.physics.add.group({
       key: "ant",
       repeat: 5,

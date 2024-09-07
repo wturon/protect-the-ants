@@ -15,6 +15,10 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   scene: [TitleScene, Level1], // Include both scenes here,
+  scale: {
+    mode: Phaser.Scale.FIT, // Ensure the game scales to fit the screen
+    autoCenter: Phaser.Scale.CENTER_BOTH, // Center the game horizontally and vertically
+  },
 };
 
 // Initialize the Phaser Game
