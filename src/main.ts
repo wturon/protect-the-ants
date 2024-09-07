@@ -5,6 +5,7 @@ class ExampleScene extends Phaser.Scene {
   private ants!: Phaser.Physics.Arcade.Group;
   score = 0;
   scoreText!: Phaser.GameObjects.Text;
+  waypoints: Phaser.Math.Vector2[] = [];
   constructor() {
     super("ExampleScene");
   }
@@ -20,7 +21,7 @@ class ExampleScene extends Phaser.Scene {
       fontSize: "32px",
       color: "#000",
     });
-    const ants = this.physics.add.group({
+    this.ants = this.physics.add.group({
       key: "ant",
       repeat: 5,
       setXY: {
@@ -31,7 +32,21 @@ class ExampleScene extends Phaser.Scene {
       },
       velocityX: 200,
     });
-    this.ants = ants;
+    this.ants.getChildren().forEach((ant) => {
+      (ant as any).waypointIndex = 0; // Initialize waypoint index for each ant
+      console.log("Ant waypoint index:", (ant as any).waypointIndex);
+    });
+
+    const middleWall = this.add.rectangle(
+      this.scale.width / 2, // x position
+      this.scale.height / 2 + 100, // y position
+      20, // width
+      this.scale.height / 2, // height
+      0x000000 // color (black)
+    );
+    this.physics.add.existing(middleWall, true);
+    this.physics.add.collider(this.ants, middleWall);
+
     const rightWall = this.add.rectangle(
       this.scale.width - 10, // x position
       this.scale.height / 2, // y position
@@ -55,6 +70,46 @@ class ExampleScene extends Phaser.Scene {
 
     resetButton.on("pointerdown", () => {
       this.scene.restart();
+    });
+
+    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      const waypoint = new Phaser.Math.Vector2(pointer.x, pointer.y);
+      this.waypoints.push(waypoint);
+      this.ants.getChildren().forEach((ant) => {
+        this.physics.moveToObject(ant, waypoint, 200);
+      });
+
+      console.log("Waypoints length:", this.waypoints.length);
+    });
+  }
+
+  update() {
+    this.ants.getChildren().forEach((ant) => {
+      const antBody = ant.body as Phaser.Physics.Arcade.Body;
+      const antData = ant as any; // Type assertion to add custom properties
+
+      if (
+        this.waypoints.length > 0 &&
+        antData.waypointIndex < this.waypoints.length
+      ) {
+        const targetWayPoint = this.waypoints[antData.waypointIndex];
+        if (
+          Phaser.Math.Distance.Between(
+            antBody.center.x,
+            antBody.center.y,
+            targetWayPoint.x,
+            targetWayPoint.y
+          ) < 50 // Adjust the distance threshold as needed
+        ) {
+          antData.waypointIndex += 1;
+          if (antData.waypointIndex >= this.waypoints.length) {
+            antBody.velocity.x = 200; // Resume heading to the right wall
+            antBody.velocity.y = 0;
+          }
+        } else {
+          this.physics.moveToObject(ant, targetWayPoint, 200);
+        }
+      }
     });
   }
 
