@@ -1,7 +1,6 @@
 import Phaser from "phaser";
 import background from "../public/assets/backgrounds/background-white.png";
 import ant from "../public/assets/sprites/ant.png";
-// Define the Example Scene
 class ExampleScene extends Phaser.Scene {
   private ants!: Phaser.Physics.Arcade.Group;
   score = 0;
@@ -16,8 +15,6 @@ class ExampleScene extends Phaser.Scene {
   }
 
   create() {
-    // Add background image
-    console.log("Creating game");
     this.add.image(400, 300, "background");
     this.scoreText = this.add.text(16, 16, "Ants Saved: 0", {
       fontSize: "32px",
@@ -27,7 +24,7 @@ class ExampleScene extends Phaser.Scene {
       key: "ant",
       repeat: 5,
       setXY: {
-        x: 100,
+        x: -200,
         y: 200,
         stepX: 50,
         stepY: 50,
@@ -43,19 +40,28 @@ class ExampleScene extends Phaser.Scene {
       0x000000 // color (black)
     );
     this.physics.add.existing(rightWall, true);
-    this.physics.add.collider(this.ants, rightWall, (ant) => {
-      this.checkAntsSaved(ant);
+    this.physics.add.collider(this.ants, rightWall, (_, ant) => {
+      this.checkAntsSaved(
+        ant as Phaser.Types.Physics.Arcade.GameObjectWithBody
+      );
+    });
+
+    const resetButton = this.add
+      .text(600, 16, "Reset", {
+        fontSize: "24px",
+        color: "#ff6666", // changed to a lighter red
+      })
+      .setInteractive();
+
+    resetButton.on("pointerdown", () => {
+      this.scene.restart();
     });
   }
 
-  private checkAntsSaved(
-    ant:
-      | Phaser.Physics.Arcade.Body
-      | Phaser.Tilemaps.Tile
-      | Phaser.Types.Physics.Arcade.GameObjectWithBody
-  ) {
+  private checkAntsSaved(ant: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
     this.score += 1;
     this.scoreText.setText("Ants Saved: " + this.score);
+    ant.destroy();
   }
 }
 
