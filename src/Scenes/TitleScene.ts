@@ -23,7 +23,7 @@ class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.uiManager.createButton(300, 500, "Play Game", () => {
-      this.scene.start("Garden");
+      this.scene.start("LevelScene");
     });
   }
 }

@@ -5,21 +5,28 @@ class Environment {
   private scene: Phaser.Scene;
   private obstacles: Phaser.GameObjects.Rectangle[] = [];
   private safezones: Phaser.GameObjects.Rectangle[] = [];
-  private levelConfig: Level;
+  private currentLevelConfig: Level;
   private currentLevel: number;
   private waypoints: Phaser.Math.Vector2[] = [];
   private ground: Phaser.GameObjects.Rectangle | null = null;
-  private isGameplayInputActive: boolean;
 
-  constructor(
-    scene: Phaser.Scene,
-    currentLevel: number,
-    isGameplayInputActive: boolean
-  ) {
+  constructor(scene: Phaser.Scene, currentLevel: number) {
     this.scene = scene;
-    this.levelConfig = LEVELS[currentLevel];
+    this.currentLevelConfig = LEVELS[currentLevel];
     this.currentLevel = currentLevel;
-    this.isGameplayInputActive = isGameplayInputActive;
+  }
+
+  init() {
+    this.waypoints = [];
+    this.obstacles = [];
+    this.safezones = [];
+    this.ground = null;
+  }
+
+  create() {
+    this.createGround();
+    this.createObstacles();
+    this.createSafezones();
   }
 
   createGround() {
@@ -38,11 +45,17 @@ class Environment {
       .setInteractive();
 
     this.ground.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+      console.log("pointerdown, attempting to add waypoint");
+      console.log("Current Waypoints: ", this.waypoints.length);
       console.log(
-        "pointerdown, attempting to add waypoint, isGameplayInputActive:",
-        this.isGameplayInputActive
+        "Allowed Waypoints: ",
+        this.currentLevelConfig.allowedWaypoints
       );
-      if (this.isGameplayInputActive) {
+      console.log(
+        "Will Create: ",
+        this.waypoints.length < this.currentLevelConfig.allowedWaypoints
+      );
+      if (this.waypoints.length < this.currentLevelConfig.allowedWaypoints) {
         this.addWaypoint(pointer);
       }
     });
@@ -56,7 +69,7 @@ class Environment {
   }
 
   createObstacles() {
-    this.levelConfig.obstacles.forEach((obstacleConfig) => {
+    this.currentLevelConfig.obstacles.forEach((obstacleConfig) => {
       const newObstacle = this.scene.add.rectangle(
         obstacleConfig.x,
         obstacleConfig.y,
@@ -100,7 +113,6 @@ class Environment {
   }
 
   addWaypoint(pointer: Phaser.Input.Pointer) {
-    console.log("pointerdown, adding waypoint");
     const waypoint = new Phaser.Math.Vector2(pointer.x, pointer.y);
     this.waypoints.push(waypoint);
     this.scene.add.image(waypoint.x, waypoint.y, "waypoint");

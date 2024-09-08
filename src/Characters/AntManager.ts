@@ -45,8 +45,7 @@ class AntManager {
     );
   }
 
-  updateAnts(isPaused: boolean) {
-    if (isPaused) return;
+  updateAnts() {
     this.spawner.update();
     const waypoints = this.environment.getWaypoints();
     this.ants.getChildren().forEach((ant) => {

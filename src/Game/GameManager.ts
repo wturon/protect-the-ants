@@ -1,72 +1,88 @@
 import Phaser from "phaser";
-import { LEVELS } from "../Services/levels.service";
+import { Level, LEVELS } from "../Services/levels.service";
 import UIManager from "./UIManager";
+
+const GameStateOptions = [
+  "IN_PROGRESS",
+  "PAUSED",
+  "CURRENT_LEVEL_COMPLETED",
+] as const;
+export type GameState = (typeof GameStateOptions)[number];
 
 class GameManager {
   private scene: Phaser.Scene;
   private currentLevel: number;
-  private isPaused: boolean;
-  private isGameplayInputActive: boolean;
   private uiManager: UIManager;
-  private score: number = 0;
+  private allTimeScore: number = 0;
+  private currentLevelScore: number = 0;
+  private levelConfig: Level;
+  private gameState: GameState = "PAUSED";
 
-  constructor(scene: Phaser.Scene, isGameplayInputActive: boolean) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.currentLevel = 0;
-    this.isPaused = true;
-    this.isGameplayInputActive = isGameplayInputActive;
     this.uiManager = new UIManager(scene);
+    this.levelConfig = LEVELS[this.currentLevel];
+  }
+
+  init() {
+    this.gameState = "PAUSED";
+    this.currentLevelScore = 0;
+    this.allTimeScore = 0;
+  }
+
+  create() {
+    this.setupUI();
+  }
+
+  update() {
+    if (this.currentLevelScore >= this.levelConfig.scoreToComplete) {
+      this.gameState = "CURRENT_LEVEL_COMPLETED";
+    }
+  }
+
+  handleLevelCompletion() {
+    this.uiManager.createNextLevelButton(() => this.nextLevel());
+    this.gameState = "PAUSED";
+  }
+  nextLevel() {
+    this.currentLevel += 1;
+    this.resetLevel();
   }
 
   setupUI() {
-    this.uiManager.addScoreText(this.score);
+    this.uiManager.addScoreText(this.allTimeScore);
     this.uiManager.addInstructionText();
     this.uiManager.createResetButton(() => this.resetLevel());
     this.uiManager.createStartButton(() => this.startLevel());
   }
 
   startLevel() {
-    console.log("Start level");
-    this.isPaused = false;
-  }
-
-  endLevel() {
-    this.isPaused = true;
-    this.uiManager.createNextLevelButton(() => this.nextLevel());
-  }
-
-  nextLevel() {
-    this.currentLevel += 1;
-    this.isPaused = true;
-    this.resetLevel();
+    this.gameState = "IN_PROGRESS";
   }
 
   resetLevel() {
-    console.log("Reset level");
-    this.isPaused = true;
     this.scene.scene.restart();
-    this.setupUI();
   }
 
   public getCurrentLevel(): number {
     return this.currentLevel;
   }
 
-  getGameStatus(): {
-    isPaused: boolean;
+  get gameStatus(): {
+    gameState: GameState;
     currentLevel: number;
-    isGameplayInputActive: boolean;
   } {
     return {
-      isPaused: this.isPaused,
+      gameState: this.gameState,
       currentLevel: this.currentLevel,
-      isGameplayInputActive: this.isGameplayInputActive,
     };
   }
 
   addPoints(points: number) {
-    this.score += points;
-    this.uiManager.updateScore(this.score);
+    this.allTimeScore += points;
+    this.currentLevelScore += points;
+    this.uiManager.updateScore(this.allTimeScore);
   }
 }
 

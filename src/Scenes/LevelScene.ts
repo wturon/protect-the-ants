@@ -6,20 +6,27 @@ import AntManager from "../Characters/AntManager";
 import GameManager from "../Game/GameManager";
 import Ant from "../Characters/Ant";
 import Environment from "../Characters/Environment";
+import DebugUtility from "../Utils/DebugUtility";
 
-class Garden extends Phaser.Scene {
+class LevelScene extends Phaser.Scene {
   private antManager: AntManager | null = null;
   private gameManager: GameManager;
   private environment: Environment;
-
+  private debugUtility: DebugUtility;
   constructor() {
-    super("Garden");
-    this.gameManager = new GameManager(this, true);
+    super("LevelScene");
+    this.gameManager = new GameManager(this);
     this.environment = new Environment(
       this,
-      this.gameManager.getCurrentLevel(),
-      this.gameManager.getGameStatus().isGameplayInputActive
+      this.gameManager.getCurrentLevel()
     );
+
+    this.debugUtility = new DebugUtility(this);
+  }
+
+  init() {
+    this.gameManager.init();
+    this.environment.init();
   }
 
   preload() {
@@ -29,6 +36,10 @@ class Garden extends Phaser.Scene {
   }
 
   create() {
+    // this.debugUtility.enableDebugMode();
+
+    this.environment.create();
+    this.gameManager.create();
     this.antManager = new AntManager(
       this,
       this.gameManager.getCurrentLevel(),
@@ -40,12 +51,6 @@ class Garden extends Phaser.Scene {
     }
 
     this.antManager.initializeSpawner();
-
-    this.environment.createGround();
-    this.environment.createObstacles();
-    this.environment.createSafezones();
-
-    this.gameManager.setupUI();
 
     // Collisions
     this.physics.add.collider(
@@ -65,12 +70,21 @@ class Garden extends Phaser.Scene {
   }
 
   update() {
-    if (!this.antManager) {
+    this.gameManager.update();
+    this.debugUtility.updateDebugInfo(this.environment);
+    if (this.gameManager.gameStatus.gameState === "PAUSED") {
       return;
     }
-    console.log("Update, paused:", this.gameManager.getGameStatus().isPaused);
-    this.antManager.updateAnts(this.gameManager.getGameStatus().isPaused);
+    if (this.gameManager.gameStatus.gameState === "IN_PROGRESS") {
+      if (!this.antManager) {
+        return;
+      }
+      this.antManager.updateAnts();
+    }
+    if (this.gameManager.gameStatus.gameState === "CURRENT_LEVEL_COMPLETED") {
+      this.gameManager.handleLevelCompletion();
+    }
   }
 }
 
-export default Garden;
+export default LevelScene;

@@ -5,8 +5,10 @@ type Obstacle = {
   height: number;
 };
 export type Level = {
+  scoreToComplete: number;
   ants: AntConfig;
   obstacles: Obstacle[];
+  allowedWaypoints: number;
 };
 
 type AntConfig = {
@@ -26,10 +28,13 @@ const screenHeight = 800;
 
 export const LEVELS: Level[] = [
   {
+    allowedWaypoints: 2,
+    scoreToComplete: 10,
     ants: {
       spawnInterval: 1000,
-      speed: 75,
+      speed: 200,
       numberOfAnts: 20,
+
       spawnLocation: {
         x: screenWidth - screenWidth / 4,
         y: screenHeight / 10,
