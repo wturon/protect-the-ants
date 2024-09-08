@@ -11,14 +11,14 @@ class TitleScene extends Phaser.Scene {
 
   create() {
     this.add
-      .text(400, 300, "Protect the Ants!", {
+      .text(300, 400, "Protect the Ants!", {
         fontSize: "48px",
-        color: "#ffffff",
+        color: "#000000",
       })
       .setOrigin(0.5);
 
     const playButton = this.add
-      .text(400, 400, "Play Game", {
+      .text(300, 500, "Play Game", {
         fontSize: "32px",
         color: "#ff6666",
       })
