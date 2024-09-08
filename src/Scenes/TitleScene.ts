@@ -26,7 +26,7 @@ class TitleScene extends Phaser.Scene {
       .setInteractive();
 
     playButton.on("pointerdown", () => {
-      this.scene.start("ExampleScene");
+      this.scene.start("Garden");
     });
   }
 }
