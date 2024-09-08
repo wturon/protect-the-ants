@@ -5,8 +5,18 @@ type Obstacle = {
   height: number;
 };
 export type Level = {
-  ants: number;
+  ants: AntConfig;
   obstacles: Obstacle[];
+};
+
+type AntConfig = {
+  spawnInterval: number;
+  speed: number;
+  numberOfAnts: number;
+  spawnLocation: {
+    x: number;
+    y: number;
+  };
 };
 
 // const screenWidth = GAME_CONFIG.width as number;
@@ -16,7 +26,15 @@ const screenHeight = 800;
 
 export const LEVELS: Level[] = [
   {
-    ants: 10,
+    ants: {
+      spawnInterval: 1000,
+      speed: 75,
+      numberOfAnts: 20,
+      spawnLocation: {
+        x: screenWidth - screenWidth / 4,
+        y: screenHeight / 10,
+      },
+    },
     obstacles: [
       {
         x: screenWidth / 2, // Center horizontally

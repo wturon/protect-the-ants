@@ -1,6 +1,9 @@
 import Phaser from "phaser";
+import UIManager from "../Game/UIManager";
 
 class TitleScene extends Phaser.Scene {
+  private uiManager!: UIManager;
+
   constructor() {
     super("TitleScene");
   }
@@ -10,6 +13,8 @@ class TitleScene extends Phaser.Scene {
   }
 
   create() {
+    this.uiManager = new UIManager(this);
+
     this.add
       .text(300, 400, "Protect the Ants!", {
         fontSize: "48px",
@@ -17,15 +22,7 @@ class TitleScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    const playButton = this.add
-      .text(300, 500, "Play Game", {
-        fontSize: "32px",
-        color: "#ff6666",
-      })
-      .setOrigin(0.5)
-      .setInteractive();
-
-    playButton.on("pointerdown", () => {
+    this.uiManager.createButton(300, 500, "Play Game", () => {
       this.scene.start("Garden");
     });
   }

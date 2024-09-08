@@ -8,12 +8,18 @@ import Ant from "../Characters/Ant";
 import Environment from "../Characters/Environment";
 
 class Garden extends Phaser.Scene {
-  private antManager!: AntManager;
-  private gameManager!: GameManager;
-  private environment!: Environment;
+  private antManager: AntManager | null = null;
+  private gameManager: GameManager;
+  private environment: Environment;
 
   constructor() {
     super("Garden");
+    this.gameManager = new GameManager(this, true);
+    this.environment = new Environment(
+      this,
+      this.gameManager.getCurrentLevel(),
+      this.gameManager.getGameStatus().isGameplayInputActive
+    );
   }
 
   preload() {
@@ -23,20 +29,17 @@ class Garden extends Phaser.Scene {
   }
 
   create() {
-    this.gameManager = new GameManager(this, true);
-    this.environment = new Environment(
-      this,
-      this.gameManager.getCurrentLevel(),
-      this.gameManager.getGameStatus().isGameplayInputActive
-    );
-
     this.antManager = new AntManager(
       this,
       this.gameManager.getCurrentLevel(),
       this.environment
     );
+    if (!this.antManager) {
+      console.error("AntManager not initialized");
+      return;
+    }
 
-    this.antManager.createAnts();
+    this.antManager.initializeSpawner();
 
     this.environment.createGround();
     this.environment.createObstacles();
@@ -54,6 +57,7 @@ class Garden extends Phaser.Scene {
       this.antManager.getAnts(),
       this.environment.getSafezones(),
       (_, ant) => {
+        if (!this.antManager) return;
         this.antManager.saveAnt(ant as Ant);
         this.gameManager.addPoints(1);
       }
@@ -61,6 +65,9 @@ class Garden extends Phaser.Scene {
   }
 
   update() {
+    if (!this.antManager) {
+      return;
+    }
     console.log("Update, paused:", this.gameManager.getGameStatus().isPaused);
     this.antManager.updateAnts(this.gameManager.getGameStatus().isPaused);
   }

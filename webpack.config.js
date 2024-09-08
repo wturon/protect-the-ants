@@ -11,9 +11,7 @@ module.exports = {
       inject: false,
     }),
     new CopyWebpackPlugin({
-      patterns: [
-        { from: "public/assets/PTA_TN.jpg", to: "" }, // Copy assets to the output directory
-      ],
+      patterns: [{ from: "public/assets/meta", to: "meta" }],
     }),
   ],
   output: {

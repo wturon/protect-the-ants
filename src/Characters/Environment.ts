@@ -8,8 +8,9 @@ class Environment {
   private levelConfig: Level;
   private currentLevel: number;
   private waypoints: Phaser.Math.Vector2[] = [];
-  private ground!: Phaser.GameObjects.Rectangle;
+  private ground: Phaser.GameObjects.Rectangle | null = null;
   private isGameplayInputActive: boolean;
+
   constructor(
     scene: Phaser.Scene,
     currentLevel: number,
