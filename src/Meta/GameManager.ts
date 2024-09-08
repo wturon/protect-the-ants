@@ -6,6 +6,7 @@ const GameStateOptions = [
   "IN_PROGRESS",
   "PAUSED",
   "CURRENT_LEVEL_COMPLETED",
+  "GAME_COMPLETED",
 ] as const;
 export type GameState = (typeof GameStateOptions)[number];
 
@@ -42,12 +43,12 @@ class GameManager {
   }
 
   handleLevelCompletion() {
-    this.uiManager.createNextLevelButton(() => this.nextLevel());
-    this.gameState = "PAUSED";
-  }
-  nextLevel() {
     this.currentLevel += 1;
-    this.resetLevel();
+    if (this.currentLevel >= LEVELS.length) {
+      this.gameState = "GAME_COMPLETED";
+      return -1;
+    }
+    return this.currentLevel;
   }
 
   setupUI() {
@@ -72,10 +73,14 @@ class GameManager {
   get gameStatus(): {
     gameState: GameState;
     currentLevel: number;
+    allTimeScore: number;
+    currentLevelScore: number;
   } {
     return {
       gameState: this.gameState,
       currentLevel: this.currentLevel,
+      allTimeScore: this.allTimeScore,
+      currentLevelScore: this.currentLevelScore,
     };
   }
 

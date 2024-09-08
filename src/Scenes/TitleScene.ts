@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import UIManager from "../Game/UIManager";
+import UIManager from "../Meta/UIManager";
 
 class TitleScene extends Phaser.Scene {
   private uiManager!: UIManager;
@@ -23,7 +23,7 @@ class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.uiManager.createButton(300, 500, "Play Game", () => {
-      this.scene.start("LevelScene");
+      this.scene.start("LevelOrchestrator");
     });
   }
 }

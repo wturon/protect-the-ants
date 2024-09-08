@@ -91,13 +91,15 @@ class UIManager {
   }
 
   createNextLevelButton(callback: () => void) {
+    const { width, height } = this.scene.scale;
     this.createButton(
-      16,
-      160,
+      width / 2,
+      height / 2,
       "Next Level",
       () => {
         callback();
-        this.scene.children.remove(this.scene.children.getByName("Next Level"));
+        const nextLevelButton = this.scene.children.getByName("Next Level");
+        nextLevelButton?.destroy();
       },
       "Next Level"
     );

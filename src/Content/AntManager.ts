@@ -6,22 +6,22 @@ import AntSpawner from "./AntSpawner";
 
 class AntManager {
   private scene: Phaser.Scene;
-  private ants: Phaser.Physics.Arcade.Group;
+  private ants!: Phaser.Physics.Arcade.Group;
   private currentLevel: number;
   private environment: Environment;
-  private spawner: AntSpawner;
+  private spawner: AntSpawner | null = null;
 
   constructor(
     scene: Phaser.Scene,
     currentLevel: number,
     environment: Environment
   ) {
-    if (!scene.physics) {
-      throw new Error("Physics system not initialized in the scene.");
-    }
     this.scene = scene;
     this.currentLevel = currentLevel;
     this.environment = environment;
+  }
+
+  init() {
     this.ants = this.scene.physics.add.group({
       classType: Ant,
     });
@@ -32,9 +32,7 @@ class AntManager {
       LEVELS[this.currentLevel].ants.spawnLocation,
       LEVELS[this.currentLevel].ants.speed
     );
-  }
 
-  initializeSpawner() {
     const levelConfig = LEVELS[this.currentLevel];
     this.spawner = new AntSpawner(
       this.scene,
@@ -46,6 +44,8 @@ class AntManager {
   }
 
   updateAnts() {
+    if (!this.spawner || !this.ants)
+      throw new Error("Must initialize spawner and ants before updating ants");
     this.spawner.update();
     const waypoints = this.environment.getWaypoints();
     this.ants.getChildren().forEach((ant) => {
