@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import GameManager from "./GameManager";
+import GameManager, { GameState } from "./GameManager";
 import { LEVELS } from "../Services/levels.service";
 import { CUSTOM_EVENTS } from "../config";
 class UIManager {
@@ -35,13 +35,17 @@ class UIManager {
         this.updateWaypoints(waypoints);
       }
     );
+    this.scene.events.on(
+      CUSTOM_EVENTS.GAME_STATE_UPDATED,
+      (state: GameState) => {
+        this.handleGameStateChange(state);
+      }
+    );
   }
 
   createForGamePlay() {
     const currentLevel = this.gameManager.gameStatus.currentLevel;
     const levelConfig = LEVELS[currentLevel];
-    console.log("levelConfig", levelConfig);
-    console.log("currentLevel", currentLevel);
     this.addScoreText(this.gameManager.gameStatus.currentLevelScore);
     this.addWaypointsText(levelConfig.allowedWaypoints);
     this.addProgressText(
@@ -53,6 +57,17 @@ class UIManager {
     this.createStartButton(() => this.gameManager.startLevel());
   }
 
+  handleGameStateChange(state: GameState) {
+    switch (state) {
+      case "PAUSED":
+        return;
+      case "IN_PROGRESS":
+        return;
+      case "CURRENT_LEVEL_COMPLETED":
+        this.createNextLevelButton(() => this.gameManager.advanceOneLevel());
+        return;
+    }
+  }
   addScoreText(score?: number) {
     this.scoreText = this.createText(16, 16, `Ants Protected: ${score || 0}`, {
       fontSize: "24px",
@@ -148,7 +163,7 @@ class UIManager {
 
   createNextLevelButton(callback: () => void) {
     const { width, height } = this.scene.scale;
-    this.createButton(
+    const nextLevelButton = this.createButton(
       width / 2,
       height / 2,
       "Next Level",

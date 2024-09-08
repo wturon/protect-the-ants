@@ -30,6 +30,7 @@ export const SCENES = {
 export const CUSTOM_EVENTS = {
   ALL_TIME_SCORE_UPDATED: "all_time_score_updated",
   CURRENT_LEVEL_SCORE_UPDATED: "current_level_score_updated",
+  GAME_STATE_UPDATED: "game_state_updated",
   WAYPOINTS_UPDATED: "waypoints_updated",
 } as const;
 

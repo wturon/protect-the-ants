@@ -44,7 +44,7 @@ class GamePlayScene extends Phaser.Scene {
   }
 
   create() {
-    // this.debugUtility.enableDebugMode();
+    this.debugUtility.enableDebugMode();
 
     this.environment.create();
     this.gameManager.create();
@@ -77,20 +77,16 @@ class GamePlayScene extends Phaser.Scene {
     this.debugUtility.updateDebugInfo(this.gameManager);
     if (this.gameManager.gameStatus.gameState === "PAUSED") {
       return;
-    }
-    if (this.gameManager.gameStatus.gameState === "IN_PROGRESS") {
+    } else if (this.gameManager.gameStatus.gameState === "IN_PROGRESS") {
       this.antManager.updateAnts();
-    }
-    if (this.gameManager.gameStatus.gameState === "CURRENT_LEVEL_COMPLETED") {
-      const nextLevel = this.gameManager.handleLevelCompletion();
-      if (nextLevel === -1) {
-        const data: EndSceneData = {
-          score: this.gameManager.gameStatus.allTimeScore,
-        };
-        this.scene.start(SCENES.END_SCENE, data);
-      } else {
-        this.scene.start(SCENES.GAME_PLAY_SCENE);
-      }
+    } else if (this.gameManager.gameStatus.gameState === "NEXT_LEVEL_READY") {
+      console.log("Triggering next level");
+      this.scene.start(SCENES.GAME_PLAY_SCENE);
+    } else if (this.gameManager.gameStatus.gameState === "GAME_COMPLETED") {
+      const data: EndSceneData = {
+        score: this.gameManager.gameStatus.allTimeScore,
+      };
+      this.scene.start(SCENES.END_SCENE, data);
     }
   }
 }
