@@ -26,3 +26,11 @@ export const SCENES = {
   GAME_PLAY_SCENE: "GamePlayScene",
   END_SCENE: "EndScene",
 };
+
+export const CUSTOM_EVENTS = {
+  ALL_TIME_SCORE_UPDATED: "all_time_score_updated",
+  CURRENT_LEVEL_SCORE_UPDATED: "current_level_score_updated",
+  WAYPOINTS_UPDATED: "waypoints_updated",
+} as const;
+
+type CustomEvents = (typeof CUSTOM_EVENTS)[keyof typeof CUSTOM_EVENTS];

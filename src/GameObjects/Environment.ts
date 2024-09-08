@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Level, LEVELS } from "../Services/levels.service";
+import { CUSTOM_EVENTS } from "../config";
 
 class Environment {
   private scene: Phaser.Scene;
@@ -45,16 +46,6 @@ class Environment {
       .setInteractive();
 
     this.ground.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      console.log("pointerdown, attempting to add waypoint");
-      console.log("Current Waypoints: ", this.waypoints.length);
-      console.log(
-        "Allowed Waypoints: ",
-        this.currentLevelConfig.allowedWaypoints
-      );
-      console.log(
-        "Will Create: ",
-        this.waypoints.length < this.currentLevelConfig.allowedWaypoints
-      );
       if (this.waypoints.length < this.currentLevelConfig.allowedWaypoints) {
         this.addWaypoint(pointer);
       }
@@ -116,6 +107,7 @@ class Environment {
     const waypoint = new Phaser.Math.Vector2(pointer.x, pointer.y);
     this.waypoints.push(waypoint);
     this.scene.add.image(waypoint.x, waypoint.y, "waypoint");
+    this.scene.events.emit(CUSTOM_EVENTS.WAYPOINTS_UPDATED, this.waypoints);
   }
 
   getWaypoints() {

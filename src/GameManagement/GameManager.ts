@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Level, LEVELS } from "../Services/levels.service";
+import { CUSTOM_EVENTS } from "../config";
 
 const GameStateOptions = [
   "IN_PROGRESS",
@@ -43,6 +44,7 @@ class GameManager {
     this.currentLevel += 1;
     if (this.currentLevel >= LEVELS.length) {
       this.gameState = "GAME_COMPLETED";
+      this.currentLevel = 0;
       return -1;
     }
     return this.currentLevel;
@@ -77,6 +79,14 @@ class GameManager {
   addPoints(points: number) {
     this.allTimeScore += points;
     this.currentLevelScore += points;
+    this.scene.events.emit(
+      CUSTOM_EVENTS.ALL_TIME_SCORE_UPDATED,
+      this.allTimeScore
+    );
+    this.scene.events.emit(
+      CUSTOM_EVENTS.CURRENT_LEVEL_SCORE_UPDATED,
+      this.currentLevelScore
+    );
   }
 }
 

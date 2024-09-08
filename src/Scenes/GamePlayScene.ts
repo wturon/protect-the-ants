@@ -68,6 +68,9 @@ class GamePlayScene extends Phaser.Scene {
         this.uiManager.updateScore(
           this.gameManager.gameStatus.currentLevelScore
         );
+        this.uiManager.updateProgressText(
+          this.gameManager.gameStatus.currentLevelScore
+        );
       }
     );
   }
