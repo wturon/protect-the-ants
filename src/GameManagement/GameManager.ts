@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { Level, LEVELS } from "../Services/levels.service";
-import UIManager from "./UIManager";
 
 const GameStateOptions = [
   "IN_PROGRESS",
@@ -13,7 +12,6 @@ export type GameState = (typeof GameStateOptions)[number];
 class GameManager {
   private scene: Phaser.Scene;
   private currentLevel: number;
-  private uiManager: UIManager;
   private allTimeScore: number = 0;
   private currentLevelScore: number = 0;
   private levelConfig: Level;
@@ -22,7 +20,6 @@ class GameManager {
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
     this.currentLevel = 0;
-    this.uiManager = new UIManager(scene);
     this.levelConfig = LEVELS[this.currentLevel];
   }
 
@@ -33,7 +30,7 @@ class GameManager {
   }
 
   create() {
-    this.setupUI();
+    // this.setupUI();
   }
 
   update() {
@@ -49,13 +46,6 @@ class GameManager {
       return -1;
     }
     return this.currentLevel;
-  }
-
-  setupUI() {
-    this.uiManager.addScoreText(this.allTimeScore);
-    this.uiManager.addInstructionText();
-    this.uiManager.createResetButton(() => this.resetLevel());
-    this.uiManager.createStartButton(() => this.startLevel());
   }
 
   startLevel() {
@@ -87,7 +77,6 @@ class GameManager {
   addPoints(points: number) {
     this.allTimeScore += points;
     this.currentLevelScore += points;
-    this.uiManager.updateScore(this.allTimeScore);
   }
 }
 

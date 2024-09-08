@@ -2,20 +2,23 @@ import Phaser from "phaser";
 import background from "../../public/assets/backgrounds/background-white.png";
 import ant from "../../public/assets/sprites/ant.png";
 import waypoint from "../../public/assets/sprites/waypoint.png";
-import AntManager from "../Content/AntManager";
-import GameManager from "../Meta/GameManager";
-import Ant from "../Content/Ant";
-import Environment from "../Content/Environment";
+import AntManager from "../GameObjects/AntManager";
+import GameManager from "../GameManagement/GameManager";
+import Ant from "../GameObjects/Ant";
+import Environment from "../GameObjects/Environment";
 import DebugUtility from "../Utils/DebugUtility";
 import { EndSceneData } from "./EndScene";
+import { SCENES } from "../config";
+import UIManager from "../GameManagement/UIManager";
 
-class LevelOrchestrator extends Phaser.Scene {
+class GamePlayScene extends Phaser.Scene {
   private antManager: AntManager;
   private gameManager: GameManager;
   private environment: Environment;
   private debugUtility: DebugUtility;
+  private uiManager: UIManager;
   constructor() {
-    super("LevelOrchestrator");
+    super(SCENES.GAME_PLAY_SCENE);
     this.gameManager = new GameManager(this);
     this.environment = new Environment(
       this,
@@ -27,12 +30,14 @@ class LevelOrchestrator extends Phaser.Scene {
       this.environment
     );
     this.debugUtility = new DebugUtility(this);
+    this.uiManager = new UIManager(this, this.gameManager);
   }
 
   init() {
     this.gameManager.init();
     this.environment.init();
     this.antManager.init();
+    this.uiManager.initForGamePlay();
   }
 
   preload() {
@@ -46,11 +51,7 @@ class LevelOrchestrator extends Phaser.Scene {
 
     this.environment.create();
     this.gameManager.create();
-
-    if (!this.antManager) {
-      console.error("AntManager not initialized");
-      return;
-    }
+    this.uiManager.createForGamePlay();
 
     // Collisions
     this.physics.add.collider(
@@ -62,9 +63,11 @@ class LevelOrchestrator extends Phaser.Scene {
       this.antManager.getAnts(),
       this.environment.getSafezones(),
       (_, ant) => {
-        if (!this.antManager) return;
         this.antManager.saveAnt(ant as Ant);
         this.gameManager.addPoints(1);
+        this.uiManager.updateScore(
+          this.gameManager.gameStatus.currentLevelScore
+        );
       }
     );
   }
@@ -73,14 +76,10 @@ class LevelOrchestrator extends Phaser.Scene {
     this.gameManager.update();
     this.debugUtility.updateDebugInfo(this.gameManager);
     if (this.gameManager.gameStatus.gameState === "PAUSED") {
-      // this.scene.pause();
       return;
     }
     if (this.gameManager.gameStatus.gameState === "IN_PROGRESS") {
-      // this.scene.resume();
-      if (this.antManager) {
-        this.antManager.updateAnts();
-      }
+      this.antManager.updateAnts();
     }
     if (this.gameManager.gameStatus.gameState === "CURRENT_LEVEL_COMPLETED") {
       const nextLevel = this.gameManager.handleLevelCompletion();
@@ -88,12 +87,12 @@ class LevelOrchestrator extends Phaser.Scene {
         const data: EndSceneData = {
           score: this.gameManager.gameStatus.allTimeScore,
         };
-        this.scene.start("EndScene", data);
+        this.scene.start(SCENES.END_SCENE, data);
       } else {
-        this.scene.start("LevelOrchestrator");
+        this.scene.start(SCENES.GAME_PLAY_SCENE);
       }
     }
   }
 }
 
-export default LevelOrchestrator;
+export default GamePlayScene;

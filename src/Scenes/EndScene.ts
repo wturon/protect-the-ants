@@ -1,13 +1,17 @@
 import Phaser from "phaser";
-import UIManager from "../Meta/UIManager";
+import UIManager from "../GameManagement/UIManager";
+import { SCENES } from "../config";
+import GameManager from "../GameManagement/GameManager";
 export interface EndSceneData {
   score: number;
 }
 class EndScene extends Phaser.Scene {
-  private uiManager!: UIManager;
-
+  private uiManager: UIManager;
+  private gameManager: GameManager;
   constructor() {
-    super("EndScene");
+    super(SCENES.END_SCENE);
+    this.gameManager = new GameManager(this);
+    this.uiManager = new UIManager(this, this.gameManager);
   }
 
   preload() {
@@ -15,8 +19,6 @@ class EndScene extends Phaser.Scene {
   }
 
   create({ score }: EndSceneData) {
-    this.uiManager = new UIManager(this);
-
     this.add
       .text(300, 300, "Congratulations!", {
         fontSize: "48px",
@@ -32,7 +34,7 @@ class EndScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.uiManager.createButton(300, 500, "Play Again", () => {
-      this.scene.start("TitleScene");
+      this.scene.start(SCENES.TITLE_SCENE);
     });
   }
 }

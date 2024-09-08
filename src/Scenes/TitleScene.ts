@@ -1,11 +1,16 @@
 import Phaser from "phaser";
-import UIManager from "../Meta/UIManager";
+import UIManager from "../GameManagement/UIManager";
+import { SCENES } from "../config";
+import GameManager from "../GameManagement/GameManager";
 
 class TitleScene extends Phaser.Scene {
-  private uiManager!: UIManager;
+  private uiManager: UIManager;
+  private gameManager: GameManager;
 
   constructor() {
-    super("TitleScene");
+    super(SCENES.TITLE_SCENE);
+    this.gameManager = new GameManager(this);
+    this.uiManager = new UIManager(this, this.gameManager);
   }
 
   preload() {
@@ -13,8 +18,6 @@ class TitleScene extends Phaser.Scene {
   }
 
   create() {
-    this.uiManager = new UIManager(this);
-
     this.add
       .text(300, 400, "Protect the Ants!", {
         fontSize: "48px",
@@ -23,7 +26,7 @@ class TitleScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.uiManager.createButton(300, 500, "Play Game", () => {
-      this.scene.start("LevelOrchestrator");
+      this.scene.start(SCENES.GAME_PLAY_SCENE);
     });
   }
 }
