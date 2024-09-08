@@ -15,10 +15,15 @@ export default class Ant extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, "ant");
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setVelocityY(200); // Adjusted for vertical movement
+    this.setVelocity(0, 0); // Ensure the ant starts with zero velocity
   }
 
-  update(waypoints: Phaser.Math.Vector2[]) {
+  update(waypoints: Phaser.Math.Vector2[], isPaused: boolean) {
+    if (isPaused) {
+      this.setVelocity(0, 0); // Stop the ant if the game is paused
+      return;
+    }
+
     if (
       waypoints.length > 0 &&
       this.waypointIndex < waypoints.length &&

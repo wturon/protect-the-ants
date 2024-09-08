@@ -1,10 +1,12 @@
 import Phaser from "phaser";
 import background from "../../public/assets/backgrounds/background-white.png";
 import ant from "../../public/assets/sprites/ant.png";
+import waypoint from "../../public/assets/sprites/waypoint.png"; // Import the waypoint image
 import Ant from "../Models/Ant";
 
 const BACKGROUND_KEY = "background";
 const ANT_KEY = "ant";
+const WAYPOINT_KEY = "waypoint"; // Define a key for the waypoint image
 const SCORE_TEXT_STYLE = { fontSize: "24px", color: "#000" };
 const INSTRUCTION_TEXT_STYLE = { fontSize: "16px", color: "#000" };
 const RESET_BUTTON_STYLE = { fontSize: "24px", color: "#ff6666" };
@@ -16,8 +18,8 @@ class Level1 extends Phaser.Scene {
   score = 0;
   scoreText!: Phaser.GameObjects.Text;
   waypoints: Phaser.Math.Vector2[] = [];
-  private isResetting = false;
   private isPaused = true; // Add a flag to track the paused state
+  private ground!: Phaser.GameObjects.Rectangle; // Add a ground element
 
   constructor() {
     super("ExampleScene");
@@ -26,23 +28,38 @@ class Level1 extends Phaser.Scene {
   preload() {
     this.load.image(BACKGROUND_KEY, background);
     this.load.image(ANT_KEY, ant);
+    this.load.image(WAYPOINT_KEY, waypoint); // Load the waypoint image
   }
 
   create() {
     this.addScoreText();
+    this.createGround(); // Create the ground element first
     this.addInstructionText();
     this.createAnts();
     this.createWalls();
     this.createResetButton();
-    this.createStartButton(); // Add the start button
+    this.createStartButton(); // Add the start button after the ground
     this.setupInputHandlers();
   }
 
   update() {
-    if (this.isPaused) return; // Skip update if the game is paused
+    if (this.isPaused) return;
     this.ants.getChildren().forEach((ant) => {
-      (ant as Ant).update(this.waypoints);
+      (ant as Ant).update(this.waypoints, this.isPaused);
     });
+  }
+
+  private createGround() {
+    this.ground = this.add
+      .rectangle(
+        this.scale.width / 2,
+        this.scale.height / 2,
+        this.scale.width,
+        this.scale.height,
+        0xffffff,
+        0 // Make it invisible
+      )
+      .setInteractive();
   }
 
   private addScoreText() {
@@ -67,8 +84,8 @@ class Level1 extends Phaser.Scene {
     this.ants = this.physics.add.group({
       classType: Ant,
       key: ANT_KEY,
-      repeat: 5,
-      setXY: { x: 200, y: -200, stepX: 50, stepY: 50 },
+      repeat: 9, // 15 ants in total (3 rows of 5)
+      setXY: { x: 200, y: -500, stepX: 50, stepY: 50 },
     });
   }
 
@@ -102,25 +119,27 @@ class Level1 extends Phaser.Scene {
     const resetButton = this.add
       .text(16, 80, "Reset", RESET_BUTTON_STYLE) // Adjusted position
       .setInteractive();
-    resetButton.on("pointerdown", this.resetGame, this);
-    resetButton.on("pointerup", () => {
-      this.isResetting = false;
-    });
+    resetButton.on(
+      "pointerdown",
+      (pointer: Phaser.Input.Pointer) => {
+        this.resetGame(pointer);
+      },
+      this
+    );
   }
 
   private createStartButton() {
     const startButton = this.add
       .text(16, 120, "Start", RESET_BUTTON_STYLE) // Adjusted position
       .setInteractive();
-    startButton.on("pointerdown", () => {
+    startButton.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       this.isPaused = false;
       startButton.destroy(); // Remove the button after starting
     });
   }
 
   private setupInputHandlers() {
-    this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      if (this.isResetting) return;
+    this.ground.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
       this.addWaypoint(pointer);
     });
   }
@@ -128,14 +147,11 @@ class Level1 extends Phaser.Scene {
   private addWaypoint(pointer: Phaser.Input.Pointer) {
     const waypoint = new Phaser.Math.Vector2(pointer.x, pointer.y);
     this.waypoints.push(waypoint);
-    this.ants.getChildren().forEach((ant) => {
-      this.physics.moveToObject(ant, waypoint, 200);
-    });
+    this.add.image(pointer.x, pointer.y, WAYPOINT_KEY); // Add the waypoint sprite to the screen
     console.log("Waypoints length:", this.waypoints.length);
   }
 
-  private resetGame() {
-    this.isResetting = true;
+  private resetGame(pointer: Phaser.Input.Pointer) {
     this.score = 0;
     this.scoreText.setText("Ants Saved: 0");
     this.waypoints = [];
@@ -143,6 +159,7 @@ class Level1 extends Phaser.Scene {
       (ant as Ant).waypointIndex = 0;
     });
     this.scene.restart();
+    this.isPaused = true; // Ensure the game starts paused after reset
   }
 
   private checkAntsSaved(ant: Phaser.Types.Physics.Arcade.GameObjectWithBody) {
