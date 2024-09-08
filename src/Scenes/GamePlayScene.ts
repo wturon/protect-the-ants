@@ -20,10 +20,7 @@ class GamePlayScene extends Phaser.Scene {
   constructor() {
     super(SCENES.GAME_PLAY_SCENE);
     this.gameManager = new GameManager(this);
-    this.environment = new Environment(
-      this,
-      this.gameManager.getCurrentLevel()
-    );
+    this.environment = new Environment(this, this.gameManager);
     this.antManager = new AntManager(
       this,
       this.gameManager.getCurrentLevel(),
@@ -47,7 +44,7 @@ class GamePlayScene extends Phaser.Scene {
   }
 
   create() {
-    this.debugUtility.enableDebugMode();
+    // this.debugUtility.enableDebugMode();
 
     this.environment.create();
     this.gameManager.create();

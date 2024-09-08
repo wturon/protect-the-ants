@@ -1,20 +1,20 @@
 import Phaser from "phaser";
 import { Level, LEVELS } from "../Services/levels.service";
 import { CUSTOM_EVENTS } from "../config";
+import GameManager from "../GameManagement/GameManager";
 
 class Environment {
   private scene: Phaser.Scene;
   private obstacles: Phaser.GameObjects.Rectangle[] = [];
   private safezones: Phaser.GameObjects.Rectangle[] = [];
-  private currentLevelConfig: Level;
-  private currentLevel: number;
+  private currentLevelConfig!: Level;
   private waypoints: Phaser.Math.Vector2[] = [];
   private ground: Phaser.GameObjects.Rectangle | null = null;
+  private gameManager: GameManager;
 
-  constructor(scene: Phaser.Scene, currentLevel: number) {
+  constructor(scene: Phaser.Scene, gameManager: GameManager) {
     this.scene = scene;
-    this.currentLevelConfig = LEVELS[currentLevel];
-    this.currentLevel = currentLevel;
+    this.gameManager = gameManager;
   }
 
   init() {
@@ -22,6 +22,8 @@ class Environment {
     this.obstacles = [];
     this.safezones = [];
     this.ground = null;
+    this.currentLevelConfig = LEVELS[this.gameManager.gameStatus.currentLevel];
+    console.log("currentLevelConfig", this.currentLevelConfig);
   }
 
   create() {
@@ -60,7 +62,9 @@ class Environment {
   }
 
   createObstacles() {
+    console.log("Creating obstacles");
     this.currentLevelConfig.obstacles.forEach((obstacleConfig) => {
+      console.log("Creating obstacle", obstacleConfig);
       const newObstacle = this.scene.add.rectangle(
         obstacleConfig.x,
         obstacleConfig.y,

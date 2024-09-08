@@ -27,7 +27,6 @@ class GameManager {
   init() {
     this.gameState = "PAUSED";
     this.currentLevelScore = 0;
-    this.allTimeScore = 0;
   }
 
   create() {
@@ -42,6 +41,7 @@ class GameManager {
 
   handleLevelCompletion() {
     this.currentLevel += 1;
+    this.incrementAllTimeScore(this.currentLevelScore);
     if (this.currentLevel >= LEVELS.length) {
       this.gameState = "GAME_COMPLETED";
       this.currentLevel = 0;
@@ -77,15 +77,18 @@ class GameManager {
   }
 
   addPoints(points: number) {
-    this.allTimeScore += points;
     this.currentLevelScore += points;
-    this.scene.events.emit(
-      CUSTOM_EVENTS.ALL_TIME_SCORE_UPDATED,
-      this.allTimeScore
-    );
     this.scene.events.emit(
       CUSTOM_EVENTS.CURRENT_LEVEL_SCORE_UPDATED,
       this.currentLevelScore
+    );
+  }
+
+  incrementAllTimeScore(number: number = 1) {
+    this.allTimeScore += number;
+    this.scene.events.emit(
+      CUSTOM_EVENTS.ALL_TIME_SCORE_UPDATED,
+      this.allTimeScore
     );
   }
 }

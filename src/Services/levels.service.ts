@@ -31,9 +31,9 @@ export const LEVELS: Level[] = [
     allowedWaypoints: 2,
     scoreToComplete: 10,
     ants: {
-      spawnInterval: 1000,
+      spawnInterval: 500,
       speed: 200,
-      numberOfAnts: 20,
+      numberOfAnts: 10,
 
       spawnLocation: {
         x: screenWidth - screenWidth / 4,
@@ -45,7 +45,35 @@ export const LEVELS: Level[] = [
         x: screenWidth / 2, // Center horizontally
         y: screenHeight / 2, // Center vertically
         width: 300,
-        height: 20,
+        height: 10,
+      },
+    ],
+  },
+  {
+    allowedWaypoints: 3,
+    scoreToComplete: 20,
+    ants: {
+      spawnInterval: 500,
+      speed: 200,
+      numberOfAnts: 20,
+
+      spawnLocation: {
+        x: screenWidth - screenWidth / 4,
+        y: screenHeight / 10,
+      },
+    },
+    obstacles: [
+      {
+        x: screenWidth / 2 - 100, // Center horizontally
+        y: screenHeight / 2 - 50, // Center vertically
+        width: 450,
+        height: 10,
+      },
+      {
+        x: screenWidth / 2 + 150, // Center horizontally
+        y: screenHeight / 2 + 50, // Center vertically
+        width: 450,
+        height: 10,
       },
     ],
   },

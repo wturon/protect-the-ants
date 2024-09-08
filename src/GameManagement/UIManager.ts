@@ -39,9 +39,9 @@ class UIManager {
 
   createForGamePlay() {
     const currentLevel = this.gameManager.gameStatus.currentLevel;
-    console.log("currentLevel", currentLevel);
     const levelConfig = LEVELS[currentLevel];
-
+    console.log("levelConfig", levelConfig);
+    console.log("currentLevel", currentLevel);
     this.addScoreText(this.gameManager.gameStatus.currentLevelScore);
     this.addWaypointsText(levelConfig.allowedWaypoints);
     this.addProgressText(
