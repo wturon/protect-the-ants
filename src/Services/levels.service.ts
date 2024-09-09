@@ -1,14 +1,14 @@
-type Obstacle = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
 export type Level = {
   scoreToComplete: number;
   ants: AntConfig;
   obstacles: Obstacle[];
   allowedWaypoints: number;
+};
+type Obstacle = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 };
 
 type AntConfig = {

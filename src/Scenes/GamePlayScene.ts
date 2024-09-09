@@ -8,7 +8,7 @@ import Ant from "../GameObjects/Ant";
 import Environment from "../GameObjects/Environment";
 import DebugUtility from "../Utils/DebugUtility";
 import { EndSceneData } from "./EndScene";
-import { SCENES } from "../config";
+import { ICON_KEYS, SCENES } from "../config";
 import UIManager from "../GameManagement/UIManager";
 
 class GamePlayScene extends Phaser.Scene {
@@ -39,12 +39,12 @@ class GamePlayScene extends Phaser.Scene {
 
   preload() {
     this.load.image("background", background);
-    this.load.image("ant", ant);
-    this.load.image("waypoint", waypoint);
+    this.load.image(ICON_KEYS.ANT, ant);
+    this.load.image(ICON_KEYS.WAYPOINT, waypoint);
   }
 
   create() {
-    this.debugUtility.enableDebugMode();
+    // this.debugUtility.enableDebugMode();
 
     this.environment.create();
     this.gameManager.create();
@@ -62,9 +62,9 @@ class GamePlayScene extends Phaser.Scene {
       (_, ant) => {
         this.antManager.saveAnt(ant as Ant);
         this.gameManager.addPoints(1);
-        this.uiManager.updateScore(
-          this.gameManager.gameStatus.currentLevelScore
-        );
+        // this.uiManager.updateScore(
+        //   this.gameManager.gameStatus.currentLevelScore
+        // );
         this.uiManager.updateProgressText(
           this.gameManager.gameStatus.currentLevelScore
         );

@@ -35,3 +35,8 @@ export const CUSTOM_EVENTS = {
 } as const;
 
 type CustomEvents = (typeof CUSTOM_EVENTS)[keyof typeof CUSTOM_EVENTS];
+
+export const ICON_KEYS = {
+  ANT: "ant",
+  WAYPOINT: "waypoint",
+};

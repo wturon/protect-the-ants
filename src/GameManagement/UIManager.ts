@@ -1,32 +1,35 @@
 import Phaser from "phaser";
 import GameManager, { GameState } from "./GameManager";
 import { LEVELS } from "../Services/levels.service";
-import { CUSTOM_EVENTS } from "../config";
+import { CUSTOM_EVENTS, ICON_KEYS } from "../config";
+
 class UIManager {
   private scene: Phaser.Scene;
-  private scoreText: Phaser.GameObjects.Text | null;
   private gameManager: GameManager;
   private waypointsText: Phaser.GameObjects.Text | null;
   private progressText: Phaser.GameObjects.Text | null;
+  private antIcon: Phaser.GameObjects.Image | null;
+  private waypointIcon: Phaser.GameObjects.Image | null;
 
   constructor(scene: Phaser.Scene, gameManager: GameManager) {
     this.scene = scene;
     this.gameManager = gameManager;
     this.waypointsText = null;
     this.progressText = null;
-    this.scoreText = null;
+    this.antIcon = null;
+    this.waypointIcon = null;
   }
 
   initForGamePlay() {
-    this.scoreText = null;
     this.waypointsText = null;
     this.progressText = null;
+    this.antIcon = null;
+    this.waypointIcon = null;
 
     this.scene.events.on(
       CUSTOM_EVENTS.CURRENT_LEVEL_SCORE_UPDATED,
       (score: number) => {
         this.updateProgressText(score);
-        this.updateScore(score);
       }
     );
     this.scene.events.on(
@@ -46,12 +49,11 @@ class UIManager {
   createForGamePlay() {
     const currentLevel = this.gameManager.gameStatus.currentLevel;
     const levelConfig = LEVELS[currentLevel];
-    this.addScoreText(this.gameManager.gameStatus.currentLevelScore);
-    this.addWaypointsText(levelConfig.allowedWaypoints);
     this.addProgressText(
       this.gameManager.gameStatus.currentLevelScore,
       levelConfig.scoreToComplete
     );
+    this.addWaypointsText(levelConfig.allowedWaypoints);
     this.addInstructionText();
     this.createResetButton(() => this.gameManager.resetLevel());
     this.createStartButton(() => this.gameManager.startLevel());
@@ -68,33 +70,19 @@ class UIManager {
         return;
     }
   }
-  addScoreText(score?: number) {
-    this.scoreText = this.createText(16, 16, `Ants Protected: ${score || 0}`, {
-      fontSize: "24px",
-      color: "#000",
-    }).setOrigin(0);
-  }
-
-  updateScore(newScore: number) {
-    if (this.scoreText) {
-      this.scoreText.setText(`Ants Protected: ${newScore}`);
-    } else {
-      console.warn(
-        "Score text doesn't exist. Did you forget to call addScoreText()?"
-      );
-    }
-  }
 
   addWaypointsText(waypointLimit: number) {
-    this.waypointsText = this.createText(
-      16,
-      80,
-      `Waypoints Left: ${waypointLimit}`,
-      {
-        fontSize: "24px",
-        color: "#000",
-      }
-    ).setOrigin(0);
+    const container = this.scene.add.container(16, 48);
+    const waypointIcon = this.scene.add
+      .image(0, 0, ICON_KEYS.WAYPOINT)
+      .setOrigin(0.5)
+      .setScale(1.5);
+    this.waypointsText = this.createText(24, 0, `${waypointLimit}`, {
+      fontSize: "12px",
+      color: "#000",
+    }).setOrigin(0.5);
+
+    container.add([waypointIcon, this.waypointsText]);
   }
 
   updateWaypoints(waypoints: Phaser.Math.Vector2[]) {
@@ -111,15 +99,22 @@ class UIManager {
   }
 
   addProgressText(currentScore: number, scoreToComplete: number) {
+    const container = this.scene.add.container(16, 16);
+    this.antIcon = this.scene.add
+      .image(0, 0, ICON_KEYS.ANT)
+      .setOrigin(0.5)
+      .setScale(1.5);
     this.progressText = this.createText(
-      16,
-      110,
-      `Progress: ${currentScore}/${scoreToComplete}`,
+      24,
+      0,
+      `${currentScore}/${scoreToComplete}`,
       {
-        fontSize: "24px",
+        fontSize: "12px",
         color: "#000",
       }
-    ).setOrigin(0);
+    ).setOrigin(0.5);
+
+    container.add([this.antIcon, this.progressText]);
   }
 
   updateProgressText(currentScore: number) {
@@ -127,7 +122,7 @@ class UIManager {
     const levelConfig = LEVELS[currentLevel];
     if (this.progressText) {
       this.progressText.setText(
-        `Progress: ${currentScore}/${levelConfig.scoreToComplete}`
+        `${currentScore}/${levelConfig.scoreToComplete}`
       );
     } else {
       console.warn(
@@ -137,20 +132,22 @@ class UIManager {
   }
 
   addInstructionText() {
-    this.scene.add.text(16, 50, "Tap anywhere to guide the ants!", {
-      fontSize: "16px",
-      color: "#000",
-    });
+    this.scene.add
+      .text(300, 700, "Tap anywhere to guide the ants!", {
+        fontSize: "16px",
+        color: "#000",
+      })
+      .setOrigin(0.5);
   }
 
   createResetButton(callback: () => void) {
-    this.createButton(64, 220, "Reset", callback, "Reset");
+    this.createButton(32, 100, "Reset", callback, "Reset");
   }
 
   createStartButton(callback: () => void) {
     this.createButton(
-      64,
-      280,
+      32,
+      140,
       "Start",
       () => {
         callback();
@@ -195,7 +192,7 @@ class UIManager {
     name: string = text
   ) {
     const buttonText = this.createText(0, 0, text, {
-      fontSize: "24px",
+      fontSize: "12px",
       color: "#000",
     });
     const buttonBackground = this.scene.add
