@@ -90,7 +90,7 @@ class UIManager {
       LEVELS[this.gameManager.gameStatus.currentLevel].allowedWaypoints;
     const waypointsLeft = waypointLimit - waypoints.length;
     if (this.waypointsText) {
-      this.waypointsText.setText(`Waypoints Left: ${waypointsLeft}`);
+      this.waypointsText.setText(`${waypointsLeft}`);
     } else {
       console.warn(
         "Waypoints text doesn't exist. Did you forget to call addWaypointsText()?"
