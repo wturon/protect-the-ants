@@ -1,14 +1,19 @@
 import Phaser from "phaser";
+import { ICON_KEYS } from "../config";
 
-enum AntState {
+export enum AntState {
   MARCHING_TO_USER_WAYPOINT = "MARCHING_TO_USER_WAYPOINT",
   MARCHING_TO_EXIT = "MARCHING_TO_EXIT",
   TRACING_OBSTACLE = "TRACING_OBSTACLE",
+  ATTACKING = "ATTACKING",
 }
 export default class Ant extends Phaser.Physics.Arcade.Sprite {
   private _currentWaypointIndex: number = 0;
   private speed: number;
   private antState: AntState;
+  private health: number;
+  private attackRange: number = 50;
+  private attackDamage: number = 10;
 
   get currentWaypointIndex(): number {
     return this._currentWaypointIndex;
@@ -22,13 +27,15 @@ export default class Ant extends Phaser.Physics.Arcade.Sprite {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    speed: number,
+    speed: number = 100,
+    health: number = 100,
     antState: AntState = AntState.MARCHING_TO_EXIT
   ) {
-    super(scene, x, y, "ant");
+    super(scene, x, y, ICON_KEYS.ANT);
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.speed = speed;
+    this.health = health;
     this.antState = antState;
   }
 
@@ -40,8 +47,8 @@ export default class Ant extends Phaser.Physics.Arcade.Sprite {
       case AntState.MARCHING_TO_EXIT:
         this.handleMarchingToExit();
         break;
-      // case AntState.TRACING_OBSTACLE:
-      //   this.handleTracingObstacle();
+      // case AntState.ATTACKING:
+      //   this.handleAttacking(enemies);
       //   break;
     }
 
@@ -58,6 +65,45 @@ export default class Ant extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.moveToObject(this, targetWayPoint, this.speed);
     if (this.isCloseToWaypoint(targetWayPoint)) {
       this.currentWaypointIndex += 1;
+    }
+  }
+
+  private handleAttacking(enemies: Ant[]) {
+    const target = this.findClosestEnemy(enemies);
+    if (target) {
+      this.scene.physics.moveToObject(this, target, this.speed);
+      if (this.isCloseToEnemy(target)) {
+        this.attack(target);
+      }
+    }
+  }
+
+  private findClosestEnemy(enemies: Ant[]): Ant | null {
+    let closestEnemy: Ant | null = null;
+    let closestDistance = this.attackRange;
+    enemies.forEach((enemy) => {
+      const distance = Phaser.Math.Distance.Between(
+        this.x,
+        this.y,
+        enemy.x,
+        enemy.y
+      );
+      if (distance < closestDistance) {
+        closestEnemy = enemy;
+        closestDistance = distance;
+      }
+    });
+    return closestEnemy;
+  }
+
+  private attack(target: Ant) {
+    target.takeDamage(this.attackDamage);
+  }
+
+  takeDamage(amount: number) {
+    this.health -= amount;
+    if (this.health <= 0) {
+      this.destroy();
     }
   }
 
@@ -84,25 +130,20 @@ export default class Ant extends Phaser.Physics.Arcade.Sprite {
     );
   }
 
+  private isCloseToEnemy(target: Ant): boolean {
+    if (!this.body || !target.body) throw new Error("Ant body is null");
+    return (
+      Phaser.Math.Distance.Between(
+        this.body.center.x,
+        this.body.center.y,
+        target.body.center.x,
+        target.body.center.y
+      ) < this.attackRange
+    );
+  }
+
   private handleMarchingToExit() {
     this.setVelocityY(this.speed);
     this.setVelocityX(0);
   }
-
-  // private handleTracingObstacle() {
-  //   // Implement obstacle tracing logic here
-  //   // For now, we'll just set the ant to move in a random direction
-  //   const randomAngle = Phaser.Math.Between(0, 360);
-  //   this.scene.physics.velocityFromAngle(
-  //     randomAngle,
-  //     this.speed,
-  //     this.body.velocity
-  //   );
-
-  //   // After tracing for a while, switch back to marching to the next waypoint
-  //   // This is a placeholder; you should implement proper obstacle tracing logic
-  //   setTimeout(() => {
-  //     this.state = AntState.MARCHING_TO_USER_WAYPOINT;
-  //   }, 1000);
-  // }
 }

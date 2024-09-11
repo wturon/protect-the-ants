@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import GameManager, { GameState } from "./GameManager";
-import { LEVELS } from "../Services/levels.service";
+import { Level, LEVELS } from "../Services/levels.service";
 import { CUSTOM_EVENTS, ICON_KEYS } from "../config";
 
 class UIManager {
@@ -20,7 +20,7 @@ class UIManager {
     this.waypointIcon = null;
   }
 
-  initForGamePlay() {
+  initForGamePlay(levelConfig: Level) {
     this.waypointsText = null;
     this.progressText = null;
     this.antIcon = null;
@@ -35,7 +35,7 @@ class UIManager {
     this.scene.events.on(
       CUSTOM_EVENTS.WAYPOINTS_UPDATED,
       (waypoints: Phaser.Math.Vector2[]) => {
-        this.updateWaypoints(waypoints);
+        this.updateWaypoints(waypoints, levelConfig.allowedWaypoints);
       }
     );
     this.scene.events.on(
@@ -47,8 +47,7 @@ class UIManager {
   }
 
   createForGamePlay() {
-    const currentLevel = this.gameManager.gameStatus.currentLevel;
-    const levelConfig = LEVELS[currentLevel];
+    const levelConfig = this.gameManager.getLevelConfig();
     this.addProgressText(
       this.gameManager.gameStatus.currentLevelScore,
       levelConfig.scoreToComplete
@@ -85,9 +84,7 @@ class UIManager {
     container.add([waypointIcon, this.waypointsText]);
   }
 
-  updateWaypoints(waypoints: Phaser.Math.Vector2[]) {
-    const waypointLimit =
-      LEVELS[this.gameManager.gameStatus.currentLevel].allowedWaypoints;
+  updateWaypoints(waypoints: Phaser.Math.Vector2[], waypointLimit: number) {
     const waypointsLeft = waypointLimit - waypoints.length;
     if (this.waypointsText) {
       this.waypointsText.setText(`${waypointsLeft}`);
@@ -118,12 +115,9 @@ class UIManager {
   }
 
   updateProgressText(currentScore: number) {
-    const currentLevel = this.gameManager.gameStatus.currentLevel;
-    const levelConfig = LEVELS[currentLevel];
+    const scoreToComplete = this.gameManager.getLevelConfig().scoreToComplete;
     if (this.progressText) {
-      this.progressText.setText(
-        `${currentScore}/${levelConfig.scoreToComplete}`
-      );
+      this.progressText.setText(`${currentScore}/${scoreToComplete}`);
     } else {
       console.warn(
         "Progress text doesn't exist. Did you forget to call addProgressText()?"

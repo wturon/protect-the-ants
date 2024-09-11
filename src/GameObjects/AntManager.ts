@@ -1,39 +1,28 @@
 import Phaser from "phaser";
-import { LEVELS } from "../Services/levels.service";
+import { Level } from "../Services/levels.service";
 import Ant from "./Ant";
-import Environment from "./Environment";
 import AntSpawner from "./AntSpawner";
+import { GameState } from "../GameManagement/GameManager";
+import { CUSTOM_EVENTS } from "../config";
 
 class AntManager {
   private scene: Phaser.Scene;
   private ants!: Phaser.Physics.Arcade.Group;
-  private currentLevel: number;
-  private environment: Environment;
   private spawner: AntSpawner | null = null;
+  private waypoints: Phaser.Math.Vector2[] = [];
+  private validMovementArea: Phaser.GameObjects.Rectangle | null = null;
 
-  constructor(
-    scene: Phaser.Scene,
-    currentLevel: number,
-    environment: Environment
-  ) {
+  constructor(scene: Phaser.Scene) {
     this.scene = scene;
-    this.currentLevel = currentLevel;
-    this.environment = environment;
   }
 
-  init() {
+  init(levelConfig: Level) {
+    this.waypoints = [];
+    this.validMovementArea = null;
     this.ants = this.scene.physics.add.group({
       classType: Ant,
     });
-    this.spawner = new AntSpawner(
-      this.scene,
-      this.ants,
-      LEVELS[this.currentLevel].ants.spawnInterval,
-      LEVELS[this.currentLevel].ants.spawnLocation,
-      LEVELS[this.currentLevel].ants.speed
-    );
 
-    const levelConfig = LEVELS[this.currentLevel];
     this.spawner = new AntSpawner(
       this.scene,
       this.ants,
@@ -43,17 +32,51 @@ class AntManager {
     );
   }
 
-  updateAnts() {
+  create(levelConfig: Level) {
+    this.createValidMovementArea(levelConfig);
+  }
+
+  update() {
     if (!this.spawner || !this.ants)
       throw new Error("Must initialize spawner and ants before updating ants");
     this.spawner.update();
-    const waypoints = this.environment.getWaypoints();
     this.ants.getChildren().forEach((ant) => {
       if (!(ant instanceof Ant)) throw new Error("Ant is null");
-      ant.update(waypoints);
+      ant.update(this.waypoints);
     });
   }
 
+  createValidMovementArea(levelConfig: Level) {
+    if (this.validMovementArea) {
+      return;
+    }
+    this.validMovementArea = this.scene.add
+      .rectangle(
+        this.scene.scale.width / 2,
+        this.scene.scale.height / 2,
+        this.scene.scale.width,
+        this.scene.scale.height,
+        0xffffff,
+        0 // Make it invisible
+      )
+      .setInteractive();
+
+    this.validMovementArea.on(
+      "pointerdown",
+      (pointer: Phaser.Input.Pointer) => {
+        if (this.waypoints.length < levelConfig.allowedWaypoints) {
+          this.addWaypoint(pointer);
+        }
+      }
+    );
+  }
+
+  addWaypoint(pointer: Phaser.Input.Pointer) {
+    const waypoint = new Phaser.Math.Vector2(pointer.x, pointer.y);
+    this.waypoints.push(waypoint);
+    this.scene.add.image(waypoint.x, waypoint.y, "waypoint");
+    this.scene.events.emit(CUSTOM_EVENTS.WAYPOINTS_UPDATED, this.waypoints);
+  }
   getAnts() {
     return this.ants;
   }
@@ -61,16 +84,6 @@ class AntManager {
   saveAnt(ant: Ant) {
     ant.destroy();
   }
-
-  handleAntObstacleCollision(
-    ant: Phaser.GameObjects.GameObject,
-    obstacle: Phaser.GameObjects.GameObject
-  ) {
-    // Handle collision logic here
-    console.log("Ant collided with obstacle:", ant, obstacle);
-  }
-
-  // Additional methods for ant interactions...
 }
 
 export default AntManager;

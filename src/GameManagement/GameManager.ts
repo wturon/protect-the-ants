@@ -66,6 +66,10 @@ class GameManager {
     return this.currentLevel;
   }
 
+  getLevelConfig() {
+    return LEVELS[this.currentLevel];
+  }
+
   get gameStatus(): {
     gameState: GameState;
     currentLevel: number;
