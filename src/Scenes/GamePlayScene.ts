@@ -2,15 +2,15 @@ import Phaser from "phaser";
 import background from "../../public/assets/backgrounds/background-white.png";
 import ant from "../../public/assets/sprites/ant.png";
 import waypoint from "../../public/assets/sprites/waypoint.png";
-import AntManager from "../GameObjects/AntManager";
 import GameManager from "../GameManagement/GameManager";
-import Ant from "../GameObjects/Ant";
-import EnvironmentManager from "../GameObjects/EnvironmentManager";
+import fireAnt from "../../public/assets/sprites/fire_ant.png";
+import EnvironmentManager from "../GameObjects/Environment/EnvironmentManager";
 import DebugUtility from "../Utils/DebugUtility";
 import { EndSceneData } from "./EndScene";
 import { ICON_KEYS, SCENES } from "../config";
 import UIManager from "../GameManagement/UIManager";
-import CollisionManager from "../GameObjects/CollisionManager";
+import CollisionManager from "../GameObjects/Environment/CollisionManager";
+import AntManager from "../GameObjects/Player/AntManager";
 
 class GamePlayScene extends Phaser.Scene {
   private antManager: AntManager;
@@ -25,10 +25,10 @@ class GamePlayScene extends Phaser.Scene {
   constructor() {
     super(SCENES.GAME_PLAY_SCENE);
     this.gameManager = new GameManager(this);
+    this.uiManager = new UIManager(this, this.gameManager);
     this.environmentManager = new EnvironmentManager(this);
     this.antManager = new AntManager(this);
     this.debugUtility = new DebugUtility(this);
-    this.uiManager = new UIManager(this, this.gameManager);
     this.collisionManager = new CollisionManager(
       this,
       this.antManager,
@@ -40,7 +40,6 @@ class GamePlayScene extends Phaser.Scene {
 
   init() {
     this.gameManager.init();
-    // const currentLevel = this.gameManager.getCurrentLevel();
     const levelConfig = this.gameManager.getLevelConfig();
     this.environmentManager.init();
     this.antManager.init(levelConfig);
@@ -51,11 +50,11 @@ class GamePlayScene extends Phaser.Scene {
     this.load.image("background", background);
     this.load.image(ICON_KEYS.ANT, ant);
     this.load.image(ICON_KEYS.WAYPOINT, waypoint);
+    this.load.image(ICON_KEYS.FIRE_ANT, fireAnt);
   }
 
   create() {
     this.debugUtility.enableDebugMode();
-
     this.gameManager.create();
     const levelConfig = this.gameManager.getLevelConfig();
     this.environmentManager.create(levelConfig);
@@ -71,13 +70,14 @@ class GamePlayScene extends Phaser.Scene {
 
     if (gameState === "IN_PROGRESS") {
       this.antManager.update();
+      this.environmentManager.update();
     }
 
     if (this.gameManager.gameStatus.gameState === "NEXT_LEVEL_READY") {
       this.scene.start(SCENES.GAME_PLAY_SCENE);
     } else if (this.gameManager.gameStatus.gameState === "GAME_COMPLETED") {
       const data: EndSceneData = {
-        score: this.gameManager.gameStatus.allTimeScore,
+        score: this.gameManager.gameStatus.savedAnts,
       };
       this.scene.start(SCENES.END_SCENE, data);
     }

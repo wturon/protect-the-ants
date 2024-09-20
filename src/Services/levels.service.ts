@@ -1,9 +1,10 @@
 export type Level = {
-  scoreToComplete: number;
+  name: string;
   ants: AntConfig;
+  lostAnts?: LostAnts[];
   obstacles: Obstacle[];
   allowedWaypoints: number;
-  fireAnts?: FireAntConfig[];
+  fireAntConfig?: FireAntConfig;
 };
 type Obstacle = {
   x: number;
@@ -15,32 +16,42 @@ type Obstacle = {
 type AntConfig = {
   spawnInterval: number;
   speed: number;
-  numberOfAnts: number;
   spawnLocation: {
     x: number;
     y: number;
   };
 };
 
-type FireAntConfig = {
+type LostAnts = {
   x: number;
   y: number;
+  detectionRadius: number;
+};
+
+type FireAntConfig = {
+  health: number;
+  visionRange: number;
+  attackDamage: number;
   speed: number;
+  startingFireAnts: {
+    x: number;
+    y: number;
+  }[];
 };
 
 // const screenWidth = GAME_CONFIG.width as number;
 // const screenHeight = GAME_CONFIG.height as number;
 const screenWidth = 600;
 const screenHeight = 800;
+const globalAntSpeed = 100;
 
 export const LEVELS: Level[] = [
   {
+    name: "Level 1",
     allowedWaypoints: 2,
-    scoreToComplete: 10,
     ants: {
       spawnInterval: 500,
-      speed: 200,
-      numberOfAnts: 10,
+      speed: globalAntSpeed,
       spawnLocation: {
         x: screenWidth - screenWidth / 4,
         y: screenHeight / 10,
@@ -57,22 +68,27 @@ export const LEVELS: Level[] = [
     ],
   },
   {
-    allowedWaypoints: 3,
-    scoreToComplete: 20,
+    name: "Level 2",
+    allowedWaypoints: 5,
     ants: {
       spawnInterval: 500,
-      speed: 200,
-      numberOfAnts: 20,
+      speed: globalAntSpeed,
 
       spawnLocation: {
         x: screenWidth - screenWidth / 4,
         y: screenHeight / 10,
       },
     },
-    fireAnts: [
-      { x: 200, y: 200, speed: 60 },
-      { x: 300, y: 300, speed: 60 },
-    ],
+    fireAntConfig: {
+      health: 100,
+      visionRange: 10,
+      attackDamage: 20,
+      speed: 60,
+      startingFireAnts: [
+        { x: 200, y: 200 },
+        { x: 300, y: 300 },
+      ],
+    },
     obstacles: [
       {
         x: screenWidth / 2 - 100, // Center horizontally
@@ -83,6 +99,40 @@ export const LEVELS: Level[] = [
       {
         x: screenWidth / 2 + 150, // Center horizontally
         y: screenHeight / 2 + 50, // Center vertically
+        width: 450,
+        height: 10,
+      },
+    ],
+  },
+  {
+    name: "Level 3",
+    allowedWaypoints: 10,
+    ants: {
+      spawnInterval: 500,
+      speed: globalAntSpeed,
+      spawnLocation: {
+        x: screenWidth - screenWidth / 4,
+        y: screenHeight / 10,
+      },
+    },
+    lostAnts: [
+      {
+        x: 100,
+        y: 400,
+        detectionRadius: 100,
+      },
+    ],
+    fireAntConfig: {
+      health: 100,
+      visionRange: 10,
+      attackDamage: 20,
+      speed: 60,
+      startingFireAnts: [{ x: 300, y: 400 }],
+    },
+    obstacles: [
+      {
+        x: screenWidth / 2 - 100, // Center horizontally
+        y: screenHeight / 2 + 100, // Center vertically
         width: 450,
         height: 10,
       },

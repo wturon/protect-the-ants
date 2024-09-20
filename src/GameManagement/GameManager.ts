@@ -14,10 +14,14 @@ export type GameState = (typeof GameStateOptions)[number];
 class GameManager {
   private scene: Phaser.Scene;
   private currentLevel: number;
-  private allTimeScore: number = 0;
-  private currentLevelScore: number = 0;
   private levelConfig!: Level;
   private gameState: GameState = "PAUSED";
+  private _colonySize: number = 1;
+  private savedAnts: number = 0;
+
+  get colonySize(): number {
+    return this._colonySize;
+  }
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -26,8 +30,8 @@ class GameManager {
 
   init() {
     this.updateGameState("PAUSED");
-    this.currentLevelScore = 0;
     this.levelConfig = LEVELS[this.currentLevel];
+    this.savedAnts = 0;
   }
 
   create() {
@@ -35,15 +39,12 @@ class GameManager {
   }
 
   update() {
-    if (this.currentLevelScore >= this.levelConfig.scoreToComplete) {
-      console.log("Current level score:", this.currentLevelScore);
-      console.log("Level score to complete:", this.levelConfig.scoreToComplete);
+    if (this.savedAnts >= this.colonySize) {
       this.updateGameState("CURRENT_LEVEL_COMPLETED");
     }
   }
 
   advanceOneLevel() {
-    this.incrementAllTimeScore(this.currentLevelScore);
     this.currentLevel += 1;
     if (this.currentLevel >= LEVELS.length) {
       this.updateGameState("GAME_COMPLETED");
@@ -73,30 +74,41 @@ class GameManager {
   get gameStatus(): {
     gameState: GameState;
     currentLevel: number;
-    allTimeScore: number;
-    currentLevelScore: number;
+    savedAnts: number;
+    colonySize: number;
   } {
     return {
       gameState: this.gameState,
       currentLevel: this.currentLevel,
-      allTimeScore: this.allTimeScore,
-      currentLevelScore: this.currentLevelScore,
+      savedAnts: this.savedAnts,
+      colonySize: this.colonySize,
     };
   }
 
-  addPoints(points: number) {
-    this.currentLevelScore += points;
+  incrementColonySize() {
+    this._colonySize += 1;
     this.scene.events.emit(
-      CUSTOM_EVENTS.CURRENT_LEVEL_SCORE_UPDATED,
-      this.currentLevelScore
+      CUSTOM_EVENTS.COLONY_STATUS_UPDATED,
+      this.savedAnts,
+      this.colonySize
     );
   }
 
-  incrementAllTimeScore(number: number = 1) {
-    this.allTimeScore += number;
+  decrementColonySize() {
+    this._colonySize -= 1;
     this.scene.events.emit(
-      CUSTOM_EVENTS.ALL_TIME_SCORE_UPDATED,
-      this.allTimeScore
+      CUSTOM_EVENTS.COLONY_STATUS_UPDATED,
+      this.savedAnts,
+      this.colonySize
+    );
+  }
+
+  antSaved() {
+    this.savedAnts += 1;
+    this.scene.events.emit(
+      CUSTOM_EVENTS.COLONY_STATUS_UPDATED,
+      this.savedAnts,
+      this.colonySize
     );
   }
 

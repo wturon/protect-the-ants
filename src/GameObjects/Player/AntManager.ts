@@ -1,10 +1,8 @@
 import Phaser from "phaser";
-import { Level } from "../Services/levels.service";
-import Ant from "./Ant";
 import AntSpawner from "./AntSpawner";
-import { GameState } from "../GameManagement/GameManager";
-import { CUSTOM_EVENTS } from "../config";
-
+import { Level } from "../../Services/levels.service";
+import Ant from "./Ant";
+import { CUSTOM_EVENTS } from "../../config";
 class AntManager {
   private scene: Phaser.Scene;
   private ants!: Phaser.Physics.Arcade.Group;
@@ -83,6 +81,10 @@ class AntManager {
 
   saveAnt(ant: Ant) {
     ant.destroy();
+  }
+
+  addLostAnt(ant: Ant) {
+    this.ants.add(ant);
   }
 }
 

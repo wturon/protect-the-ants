@@ -27,11 +27,12 @@ class UIManager {
     this.waypointIcon = null;
 
     this.scene.events.on(
-      CUSTOM_EVENTS.CURRENT_LEVEL_SCORE_UPDATED,
-      (score: number) => {
-        this.updateProgressText(score);
+      CUSTOM_EVENTS.COLONY_STATUS_UPDATED,
+      (savedAnts: number, colonySize: number) => {
+        this.updateAntSavedText(savedAnts, colonySize);
       }
     );
+
     this.scene.events.on(
       CUSTOM_EVENTS.WAYPOINTS_UPDATED,
       (waypoints: Phaser.Math.Vector2[]) => {
@@ -49,8 +50,8 @@ class UIManager {
   createForGamePlay() {
     const levelConfig = this.gameManager.getLevelConfig();
     this.addProgressText(
-      this.gameManager.gameStatus.currentLevelScore,
-      levelConfig.scoreToComplete
+      this.gameManager.gameStatus.savedAnts,
+      this.gameManager.gameStatus.colonySize
     );
     this.addWaypointsText(levelConfig.allowedWaypoints);
     this.addInstructionText();
@@ -114,10 +115,9 @@ class UIManager {
     container.add([this.antIcon, this.progressText]);
   }
 
-  updateProgressText(currentScore: number) {
-    const scoreToComplete = this.gameManager.getLevelConfig().scoreToComplete;
+  updateAntSavedText(antsSaved: number, colonySize: number) {
     if (this.progressText) {
-      this.progressText.setText(`${currentScore}/${scoreToComplete}`);
+      this.progressText.setText(`${antsSaved}/${colonySize}`);
     } else {
       console.warn(
         "Progress text doesn't exist. Did you forget to call addProgressText()?"
@@ -135,7 +135,7 @@ class UIManager {
   }
 
   createResetButton(callback: () => void) {
-    this.createButton(32, 100, "Reset", callback, "Reset");
+    this.createButton(32, 100, "Reset", callback, "Reset").setDepth(100);
   }
 
   createStartButton(callback: () => void) {
@@ -149,7 +149,7 @@ class UIManager {
         startButton?.destroy();
       },
       "Start"
-    );
+    ).setDepth(100);
   }
 
   createNextLevelButton(callback: () => void) {
@@ -164,7 +164,7 @@ class UIManager {
         nextLevelButton?.destroy();
       },
       "Next Level"
-    );
+    ).setDepth(100);
   }
 
   // Create a generic text element

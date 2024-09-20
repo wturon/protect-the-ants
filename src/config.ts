@@ -28,8 +28,7 @@ export const SCENES = {
 };
 
 export const CUSTOM_EVENTS = {
-  ALL_TIME_SCORE_UPDATED: "all_time_score_updated",
-  CURRENT_LEVEL_SCORE_UPDATED: "current_level_score_updated",
+  COLONY_STATUS_UPDATED: "colony_status_updated",
   GAME_STATE_UPDATED: "game_state_updated",
   WAYPOINTS_UPDATED: "waypoints_updated",
 } as const;
@@ -39,4 +38,5 @@ type CustomEvents = (typeof CUSTOM_EVENTS)[keyof typeof CUSTOM_EVENTS];
 export const ICON_KEYS = {
   ANT: "ant",
   WAYPOINT: "waypoint",
+  FIRE_ANT: "fireAnt",
 } as const;
